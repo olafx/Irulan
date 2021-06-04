@@ -26,12 +26,12 @@ private:
     value_type *data;
 
 private:
-    template <typename Dim, typename ...Dims>
-    static size_t size(Dim dim, Dims... dims) noexcept
+    template <typename ...Dims>
+    static size_t size(Dims... dims) noexcept
     {   if constexpr (layout == conventional)
-            return dim * (dims * ...);
+            return (dims * ...);
         if constexpr (layout == packed)
-            return combinations(order + dim - 1, order);
+            return combinations(order + [](auto a, auto... b){ return a; }(dims...) - 1, order);
     }
 
 private:
