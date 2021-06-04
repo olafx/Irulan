@@ -64,6 +64,10 @@ public:
     const size_type& operator[](I i) const noexcept
     {   return dims[i];
     }
+    template <typename I, std::enable_if_t<std::is_integral_v<I>>>
+    size_type& operator[](I i) noexcept
+    {   return dims[i];
+    }
 
 public:
     value_type *operator()() noexcept
