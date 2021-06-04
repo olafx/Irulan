@@ -1,6 +1,6 @@
-Dynamic operator[] should also return non-const lvalue ref.
+Fix Dynamic::Array.
 
-Test suite for Hybrid::Array and Dynamic::Array.
+Test suite for Dynamic::Array.
 
 Add readme.
 
