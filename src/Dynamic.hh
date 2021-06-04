@@ -60,11 +60,11 @@ public:
     }
 
 public:
-    template <typename I, std::enable_if_t<std::is_integral_v<I>>>
+    template <typename I, std::enable_if_t<std::is_integral_v<I>>* = nullptr>
     const size_type& operator[](I i) const noexcept
     {   return dims[i];
     }
-    template <typename I, std::enable_if_t<std::is_integral_v<I>>>
+    template <typename I, std::enable_if_t<std::is_integral_v<I>>* = nullptr>
     size_type& operator[](I i) noexcept
     {   return dims[i];
     }
@@ -75,11 +75,11 @@ public:
     }
 
 public:
-    template <typename ...I, std::enable_if_t<(std::is_integral_v<I> && ...)>>
+    template <typename ...I, std::enable_if_t<(std::is_integral_v<I> && ...)>* = nullptr>
     value_type& operator()(I... i) noexcept
     {   return (*this)()[index_offset<order - sizeof...(i)>(i...)];
     }
-    template <typename ...I, std::enable_if_t<(std::is_integral_v<I> && ...)>>
+    template <typename ...I, std::enable_if_t<(std::is_integral_v<I> && ...)>* = nullptr>
     const value_type& operator()(I... i) const noexcept
     {   return (*this)()[index_offset<order - sizeof...(i)>(i...)];
     }

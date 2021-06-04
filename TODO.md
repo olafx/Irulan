@@ -1,5 +1,3 @@
-Fix Dynamic::Array.
-
 Test suite for Dynamic::Array.
 
 Add readme.
