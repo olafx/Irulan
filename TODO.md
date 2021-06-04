@@ -1,5 +1,3 @@
-Test suite for Dynamic::Array.
-
 Add readme.
 
 Generalize packed matrix indexing to packed tensor indexing.
