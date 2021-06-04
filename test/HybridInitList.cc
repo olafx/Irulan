@@ -1,5 +1,4 @@
 #include "../src/Hybrid.hh"
-#include <iostream>
 
 int main()
 {   using namespace Irulan;
