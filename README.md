@@ -134,6 +134,6 @@ Dynamic::Array<float[3], Layout<packed>> A {3}; // size 10
 Initializer lists are used not only for initialization, but also for assignment.
 
 ```C++
-Hybrid::Array<int[2][2][2]> A {{{1, 2}, {3, 4}}, {5, 6}, {7, 8}};
+Hybrid::Array<int[2][2][2]> A {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
 A(1, 1) = {-1, -2};
 ```

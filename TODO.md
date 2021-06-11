@@ -1,5 +1,3 @@
-Add readme.
-
 Generalize packed matrix indexing to packed tensor indexing.
 
 Add compile time checks for misuse where possible.

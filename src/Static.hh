@@ -83,7 +83,7 @@ private:
 public:
     Array() noexcept = default;
     Array(const Array& other) noexcept = default;
-    constexpr Array(const deep_init_list& list) : data {}
+    constexpr Array(const deep_init_list& list) noexcept : data {}
     {   *this = list;
     }
 
