@@ -2,9 +2,17 @@
 
 **C++17 multidimensional array (tensor) library.**
 
-Focuses on data, not math. Provides various layouts from various libraries (BLAS, LAPACK, etc.), and is designed to be used in parallel with these libraries.
+**This project is WIP!**
 
-**Proof of concept, and very much WIP.**
+I wrote this library to make my numerical codes easier to write in CUDA/C++.
+
+It provides tensor data structures, completely recursively defined, and of various layouts as to work in parallel with CBLAS, cuBLAS, LAPACK, etc.
+
+What sets this library apart from other tensor libraries is twofold:
+- Total control over data layout and what is and isn't compile time.
+- No math.
+
+I have written and rewritten this library many times to make it as elegant as possible, but implementation stays complex and difficult because it can't not be. The syntax however is elegant.
 
 
 
@@ -15,14 +23,13 @@ Focuses on data, not math. Provides various layouts from various libraries (BLAS
 Compile time size, direct storage (stack). (`std::array` equivalent.)
 
 ```C++
-Static::Array<int8_t[3][4][5]> A;
-constexpr Static::Array<float[2][2]> B {{1, 2}, {3, 4}};
+Static::Array<int[3][4][5]> A;
 ```
 
 For regular dense tensors, stores a C-style array of lower order tensors.
 
 ```C++
-Static::Array<int8_t[3][4]> C = A(4);
+Static::Array<int[3][4]> C = A(4);
 ```
 
 ### Hybrid
@@ -30,20 +37,23 @@ Static::Array<int8_t[3][4]> C = A(4);
 Compile time size, heap storage. (`new std::array` equivalent.)
 
 ```C++
-Hybrid::Array<int8_t[2][3]> A {{1, 2}, {3}, {5, 6}};
+Hybrid::Array<int[2][3]> A {{1, 2}, {3}, {5, 6}};
 ```
+
+Allocation uses `malloc` over `new` due to need for future consistency with CUDA allocation once implemented.
 
 ### Dynamic
 
-Run time size. Compile time order. (`std::vector` equivalent, without the dynamic allocation.)
+Run time size. Compile time order. (`new type[size]` equivalent.)
+(Trying to change this to make the order implicit based on number of constructor arguments. Might be impossible.)
 
 ```C++
-Dynamic::Array<int8_t[3]> A {3840, 3840, 3};
+Dynamic::Array<int[3]> A {3840, 3840, 3};
 ```
 
-Dimensions are stored on stack in the object.
+Dimensions are stored on stack in the object, not with the rest of the data.
 
-
+Allocation uses `malloc` over `new` due to need for future consistency with CUDA allocation once implemented.
 
 ## Property System
 
@@ -53,7 +63,7 @@ Properties are templated. They can be given in any order. All have implicit defa
 Static:Array<int[3]> A;
 Static:Array<int[3], Layout<conventional>> B;
 Static:Array<Layout<conventional>, int[3]> C;
-// all the same
+// all the same because order doesn't matter and 'Layout' is 'conventional' by default
 ```
 
 
@@ -73,27 +83,38 @@ If the 'wrong' number indices is given, it will correctly interpret this and ret
 
 ```C++
 A(3);
-// points to 4th column, not 4th element
-// A(0, 3), not A(3, 0)
+// points to 4th column, not 4th element, i.e. A(3) == A(0, 3), not A(3) == A(3, 0)
 ```
 
 ### Dimensions
 
-The square bracket operator is used.
+The square bracket operator is used to get dimensions.
 
 ```C++
-Hybrid:Array<int8_t[3][4][5]> A;
+Hybrid:Array<int[3][4][5]> A;
 A[1]; // 4
+```
+
+For dynamic tensors the dimension can be set also (i.e. reinterpreted).
+It's designed to be used like this, but there is no safety; it will never reallocate.
+
+```C++
+Dynamic::Array<int[3]> A {16, 16, 3};
+A[0] = 4;
+A[1] = 6;
+A[2] = 24;
+// works fine since 4 * 6 * 24 <= 16 * 16 * 3
 ```
 
 ### Pointer
 
-In the spirit of working in parallel with other libraries, a raw pointer can easily be returned to send to e.g. some CBLAS function.
+In the spirit of working in parallel with other libraries, a raw pointer can easily be returned. It can however not be set.
 
 ```C++
 Dynamic::Array<double[2]> A {64, 64};
 A(); // raw pointer
 ```
+(In the future it will be possible to set the pointer as well, but I need to look at some examples first where this is useful and from those examples deduce good functionality.)
 
 
 
@@ -136,4 +157,10 @@ Initializer lists are used not only for initialization, but also for assignment.
 ```C++
 Hybrid::Array<int[2][2][2]> A {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
 A(1, 1) = {-1, -2};
+```
+
+It's possible to make `constexpr` tensors in this way.
+
+```C++
+constexpr Static::Array<int[2][2]> B {{1, 2}, {3, 4}};
 ```
