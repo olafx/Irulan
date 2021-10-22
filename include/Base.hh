@@ -175,7 +175,7 @@ public:
 
     template <typename T>
     static constexpr T combinations(T n, T k) noexcept
-    {   T result {1};
+    {   T result = 1;
         for (T i = 1; i <= k; i++)
             result = (n - i + 1) * result / i;
         return result;

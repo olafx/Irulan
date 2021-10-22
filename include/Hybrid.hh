@@ -19,7 +19,7 @@ public:
           Base<Properties...>::axis,
           typename Base<Properties...>::size_type,
           typename Base<Properties...>::value_type;
-    static constexpr size_t order {Base<Properties...>::dims.size()};
+    static constexpr size_t order = Base<Properties...>::dims.size();
 
 
 
