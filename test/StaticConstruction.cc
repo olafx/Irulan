@@ -1,4 +1,4 @@
-#include "../src/Static.hh"
+#include "../include/Static.hh"
 
 int main()
 {   using namespace Irulan;

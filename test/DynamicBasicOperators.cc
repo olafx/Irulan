@@ -1,4 +1,4 @@
-#include "../src/Dynamic.hh"
+#include "../include/Dynamic.hh"
 
 int main()
 {   using namespace Irulan;

@@ -1,4 +1,4 @@
-#include "../src/Hybrid.hh"
+#include "../include/Hybrid.hh"
 
 int main()
 {   using namespace Irulan;
