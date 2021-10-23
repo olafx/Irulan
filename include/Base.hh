@@ -142,7 +142,7 @@ public:
 
 public:
 
-    // Using the extractor.
+    //  Using the extractor.
 
     static constexpr LayoutEnum layout {Extractor<LayoutBase, Layout<conventional>>::type::value};
     static constexpr AxisEnum   axis   {Extractor<AxisBase,           Axis<column>>::type::value};
@@ -153,8 +153,8 @@ public:
 
 public:
 
-    // Defining a nested version of std::initializer_list.
-    // Used for setting values of 'Array's for e.g. initialization.
+    //  Defining a nested version of std::initializer_list.
+    //  Used for setting values of 'Array's for e.g. initialization.
 
     template <size_t depth, typename T>
     struct DeepInitList
@@ -170,8 +170,8 @@ public:
 
 public:
 
-    // Combinations function (n choose k) needed for the size of packed 'Array's.
-    // (Not optimized for large 'k' since it's never large in practice.)
+    //  Combinations function (n choose k) needed for the size of packed 'Array's.
+    //  (Not optimized for large 'k' since it's never large in practice.)
 
     template <typename T>
     static constexpr T combinations(T n, T k) noexcept

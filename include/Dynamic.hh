@@ -7,7 +7,7 @@ namespace Irulan
 {   namespace Dynamic
     {
 
-// Dynamic 'Array' has runtime size and heap allocated data.
+//  Dynamic 'Array' has runtime size and heap allocated data.
 
 template <typename ...Properties>
 struct Array : Base<Properties...>
@@ -39,7 +39,7 @@ private:
 
 private:
 
-    // Calculate the data size, which depends on 'Layout' and 'dims'.
+    //  Calculate the data size, which depends on 'Layout' and 'dims'.
 
     template <typename ...Dims>
     static size_t size(Dims... dims) noexcept
@@ -53,8 +53,8 @@ private:
 
 private:
 
-    // Calculates 1D memory index based on nD 'Array' index where n is 'order'.
-    // Currently only implemented for 'Layout<conventional>'.
+    //  Calculates 1D memory index based on nD 'Array' index where n is 'order'.
+    //  Currently only implemented for 'Layout<conventional>'.
 
     template <size_t level, typename I, typename ...J>
     auto index(I i, J... j) const noexcept
@@ -64,8 +64,8 @@ private:
             return index<level + 1>(j...) * (*this)[level] + i;
     }
 
-    // Calculates 1D memory index based on nD 'Array' index. Behavior is 'Axis' property dependent if n < 'order'.
-    // Currently only implemented for 'Layout<conventional>'.
+    //  Calculates 1D memory index based on nD 'Array' index. Behavior is 'Axis' property dependent if n < 'order'.
+    //  Currently only implemented for 'Layout<conventional>'.
 
     template <size_t level, typename ...I>
     auto index_offset(I... i) const noexcept
@@ -79,7 +79,7 @@ private:
 
 public:
 
-    // Malloc is used for data memory allocation due to need for future CUDA compatibility.
+    //  Malloc is used for data memory allocation due to need for future CUDA compatibility.
 
     template <typename ...Dims>
     Array(Dims... dims)
@@ -93,7 +93,7 @@ public:
 
 public:
 
-    // Dimension operator.
+    //  Dimension operator.
 
     template <typename I, std::enable_if_t<std::is_integral_v<I>>* = nullptr>
     const size_type& operator[](I i) const noexcept
@@ -108,7 +108,7 @@ public:
 
 public:
 
-    // Raw data access.
+    //  Raw data access.
 
     value_type *operator()() noexcept
     {   return data;
@@ -118,8 +118,8 @@ public:
 
 public:
 
-    // Indexing.
-    // Currently only implemented for 'Layout<conventional>'.
+    //  Indexing.
+    //  Currently only implemented for 'Layout<conventional>'.
 
     template <typename ...I, std::enable_if_t<(std::is_integral_v<I> && ...)>* = nullptr>
     value_type& operator()(I... i) noexcept
@@ -135,7 +135,7 @@ public:
 
 public:
 
-    // Assignment via a value will set all data to this value.
+    //  Assignment via a value will set all data to this value.
 
     Array& operator=(const value_type& value) noexcept
     {   for (size_type i = 0; i < (*this)[order - 1]; i++)
@@ -143,8 +143,8 @@ public:
         return *this;
     }
 
-    // Assignment via a 'DeepInitList' does not require said list to be full, and may use the previously defined value
-    // assignment operator (in case the list's order is less than 'order').
+    //  Assignment via a 'DeepInitList' does not require said list to be full, and may use the previously defined value
+    //  assignment operator (in case the list's order is less than 'order').
 
     Array& operator=(const DeepInitList& list) noexcept
     {   for (size_type i = 0; i < list.size(); i++)

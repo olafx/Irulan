@@ -7,7 +7,7 @@ namespace Irulan
 {   namespace Hybrid
     {
 
-// Hybrid 'Array' has compile time size and heap allocated data.
+//  Hybrid 'Array' has compile time size and heap allocated data.
 
 template <typename ...Properties>
 struct Array : Base<Properties...>
@@ -37,7 +37,7 @@ private:
 
 public:
 
-    // Malloc is used for data memory allocation due to need for future CUDA compatibility.
+    //  Malloc is used for data memory allocation due to need for future CUDA compatibility.
 
     Array()
         : data {static_cast<decltype(data)>(malloc(sizeof(decltype(*data))))}
@@ -65,7 +65,7 @@ public:
 
 public:
 
-    // Dimension operator.
+    //  Dimension operator.
 
     template <typename I>
     constexpr const size_type& operator[](I i) const noexcept
@@ -76,7 +76,7 @@ public:
 
 public:
 
-    // Raw data access.
+    //  Raw data access.
 
     value_type *operator()() noexcept
     {   return (*data)();
@@ -86,8 +86,8 @@ public:
 
 public:
 
-    // Indexing.
-    // Currently only implemented for 'Layout<conventional>'.
+    //  Indexing.
+    //  Currently only implemented for 'Layout<conventional>'.
 
     template <typename ...I>
     auto& operator()(I... i) noexcept
@@ -103,15 +103,15 @@ public:
 
 public:
 
-    // Assignment via a value will set all data to this value.
+    //  Assignment via a value will set all data to this value.
 
     Array& operator=(const value_type& value) noexcept
     {   *data = value;
         return *this;
     }
 
-    // Assignment via a 'DeepInitList' does not require said list to be full, and may use the previously defined value
-    // assignment operator (in case the list's order is less than 'order').
+    //  Assignment via a 'DeepInitList' does not require said list to be full, and may use the previously defined value
+    //  assignment operator (in case the list's order is less than 'order').
 
     Array& operator=(const DeepInitList& list) noexcept
     {   *data = list;
