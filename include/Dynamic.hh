@@ -26,7 +26,7 @@ public:
 private:
 
     using Base<Properties...>::combinations;
-    using DeepInitList = typename Base<Properties...>::template DeepInitList<order, size_type>::type;
+    using DeepInitList = typename Base<Properties...>::template DeepInitList<order, value_type>::type;
 
 
 
