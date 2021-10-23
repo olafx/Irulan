@@ -22,6 +22,5 @@ int main()
                         return EXIT_FAILURE;
                     prev = &A(i, j, k);
                 }
-                    
     }
 }

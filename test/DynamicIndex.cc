@@ -21,7 +21,6 @@ int main()
                 {   if (&A(i, j, k) != prev + 1)
                         return EXIT_FAILURE;
                     prev = &A(i, j, k);
-                }
-                    
+                } 
     }
 }
