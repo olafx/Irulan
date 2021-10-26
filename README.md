@@ -111,9 +111,19 @@ A[2] = 24;
 In the spirit of working in parallel with other libraries, a raw pointer can easily be returned. It can however not be set.
 
 ```C++
-Dynamic::Array<double[2]> A {64, 64};
-A(); // raw pointer
+#include <fftw3.h>
+#include <vtkNew>
+#include <vtkImageImport>
+Dynamic::Array<fftw_complex[3]> in {512, 512, 256}, out {512, 512, 256};
+auto plan = fftw_plan_dft_3d(in[0], in[1], in[2], in(), out(), FFTW_FORWARD, FFTW_ESTIMATE);
+...
+vtkNew<vtkImageImport> image_import;
+image_import->SetWholeExtent(0, out[0] - 1, 0, out[1] - 1, 0, out[2] - 1);
+image_import->SetNumberOfScalarComponents(in.order);
+image_import->SetImportVoidPointer(static_cast<void *>(out()));
+...
 ```
+
 (In the future it will be possible to set the pointer as well, but I need to look at some examples first where this is useful and from those examples deduce good functionality.)
 
 
