@@ -172,7 +172,7 @@ public:
             else
                 return data.value[0]();
         }
-        if constexpr (layout == packed)
+        else if constexpr (layout == packed)
             return data.value;
     }
 
@@ -183,7 +183,7 @@ public:
             else
                 return data.value[0]();
         }
-        if constexpr (layout == packed)
+        else if constexpr (layout == packed)
             return data.value;
     }
 
@@ -202,7 +202,7 @@ public:
             else
                 return (*this)(j...)(i);
         }
-        if constexpr (layout == packed)
+        else if constexpr (layout == packed)
             //  TODO
             return;
     }
@@ -215,7 +215,7 @@ public:
             else
                 return (*this)(j...)(i);
         }
-        if constexpr (layout == packed)
+        else if constexpr (layout == packed)
             //  TODO
             return;
     }

@@ -4,8 +4,6 @@
 #include <type_traits>
 #include "Type.hh"
 
-#include <iostream>
-
 namespace Irulan
 {
 
