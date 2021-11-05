@@ -13,9 +13,7 @@ namespace Irulan
 
 //  Shape property is special and only needs a base to distinguish it from other properties.
 
-struct ShapeBase
-{   virtual ~ShapeBase() = 0;
-};
+struct ShapeBase {};
 
 
 
@@ -24,14 +22,11 @@ struct ShapeBase
 
 enum LayoutEnum {conventional, packed};
 
-struct LayoutBase
-{   virtual ~LayoutBase() = 0;
-};
+struct LayoutBase {};
 
 template <LayoutEnum layout>
 struct Layout : LayoutBase
 {   static constexpr LayoutEnum value {layout};
-    virtual ~Layout() = 0;
 };
 
 
@@ -40,23 +35,18 @@ struct Layout : LayoutBase
 
 enum AxisEnum {column};
 
-struct AxisBase
-{   virtual ~AxisBase() = 0;
-};
+struct AxisBase {};
 
 template <AxisEnum axis>
 struct Axis : AxisBase
 {   static constexpr AxisEnum value {axis};
-    virtual ~Axis() = 0;
 };
 
 
 
 //  The allocate property is used to distinguish the usual Array's that hold data from ones that wrap existing data.
 
-struct AllocateBase
-{   virtual ~AllocateBase() = 0;
-};
+struct AllocateBase {};
 
 template <bool allocate>
 struct Allocate : AllocateBase
@@ -67,9 +57,7 @@ struct Allocate : AllocateBase
 
 //  The size type property specifies the type to use for specifying the Array's shape.
 
-struct SizeTypeBase
-{   virtual ~SizeTypeBase() = 0;
-};
+struct SizeTypeBase {};
 
 template <typename size_type>
 struct SizeType : SizeTypeBase
