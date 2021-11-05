@@ -17,6 +17,7 @@ public:
 
     using Base<Properties...>::layout,
           Base<Properties...>::axis,
+          Base<Properties...>::allocate,
           typename Base<Properties...>::size_type,
           typename Base<Properties...>::value_type;
     static constexpr size_t order = Base<Properties...>::dims[0];
@@ -43,9 +44,11 @@ private:
 
     template <typename ...Dims>
     static size_t size(Dims... dims) noexcept
-    {   if constexpr (layout == conventional)
+    {   if constexpr (sizeof...(dims) == 0)
+            return 0;
+        else if constexpr (layout == conventional)
             return (dims * ...);
-        if constexpr (layout == packed)
+        else if constexpr (layout == packed)
             return combinations(order + [](auto a, auto... b){ return a; }(dims...) - 1, order);
     }
 
@@ -81,12 +84,18 @@ public:
 
     //  Malloc is used for data memory allocation due to need for future CUDA compatibility.
 
-    template <typename ...Dims>
+    template <typename ...Dims, bool allocate_delayed = allocate, std::enable_if_t<allocate_delayed>* = nullptr>
     Array(Dims... dims)
         : dims {static_cast<size_type>(dims)...},
           data {static_cast<decltype(data)>(malloc(sizeof(decltype(*data)) * size(dims...)))}
     {   if (data == NULL)
             throw std::bad_alloc {};
+    }
+
+    template <typename ...Dims, bool allocate_delayed = allocate, std::enable_if_t<!allocate_delayed>* = nullptr>
+    Array(Dims... dims)
+        : dims {static_cast<size_type>(dims)...}
+    {
     }
 
 
@@ -95,11 +104,11 @@ public:
 
     //  Dimension operator.
 
-    template <typename I, std::enable_if_t<std::is_integral_v<I>>* = nullptr>
+    template <typename I, typename = std::enable_if_t<std::is_integral_v<I>>>
     const size_type& operator[](I i) const noexcept
     {   return dims[i];
     }
-    template <typename I, std::enable_if_t<std::is_integral_v<I>>* = nullptr>
+    template <typename I, typename = std::enable_if_t<std::is_integral_v<I>>>
     size_type& operator[](I i) noexcept
     {   return dims[i];
     }
@@ -110,7 +119,10 @@ public:
 
     //  Raw data access.
 
-    value_type *operator()() noexcept
+    const value_type *& operator()() const noexcept
+    {   return data;
+    }
+    value_type *& operator()() noexcept
     {   return data;
     }
 
@@ -121,12 +133,12 @@ public:
     //  Indexing.
     //  Currently only implemented for 'Layout<conventional>'.
 
-    template <typename ...I, std::enable_if_t<(std::is_integral_v<I> && ...)>* = nullptr>
+    template <typename ...I, typename = std::enable_if_t<(std::is_integral_v<I> && ...)>>
     value_type& operator()(I... i) noexcept
     {   return (*this)()[index_offset<order - sizeof...(i)>(i...)];
     }
 
-    template <typename ...I, std::enable_if_t<(std::is_integral_v<I> && ...)>* = nullptr>
+    template <typename ...I, typename = std::enable_if_t<(std::is_integral_v<I> && ...)>>
     const value_type& operator()(I... i) const noexcept
     {   return (*this)()[index_offset<order - sizeof...(i)>(i...)];
     }

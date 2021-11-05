@@ -154,7 +154,7 @@ public:
 
     //  Dimension operator.
 
-    template <typename I, std::enable_if_t<std::is_integral_v<I>>* = nullptr>
+    template <typename I, typename = std::enable_if_t<std::is_integral_v<I>>>
     constexpr const size_type& operator[](I i) const noexcept
     {   return dims[i];
     }
@@ -194,7 +194,7 @@ public:
     //  Indexing.
     //  Currently only implemented for 'Layout<conventional>'.
 
-    template <typename I, typename ...J, std::enable_if_t<std::is_integral_v<I>>* = nullptr>
+    template <typename I, typename ...J, typename = std::enable_if_t<std::is_integral_v<I>>>
     constexpr auto& operator()(I i, J... j) noexcept
     {   if constexpr (layout == conventional)
         {   if constexpr (sizeof...(j) == 0)
@@ -207,7 +207,7 @@ public:
             return;
     }
 
-    template <typename I, typename ...J, std::enable_if_t<std::is_integral_v<I>>* = nullptr>
+    template <typename I, typename ...J, typename = std::enable_if_t<std::is_integral_v<I>>>
     constexpr const auto& operator()(I i, J... j) const noexcept
     {   if constexpr (layout == conventional)
         {   if constexpr (sizeof...(j) == 0)

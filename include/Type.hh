@@ -16,12 +16,14 @@ enum AxisEnum   {column};
 struct ShapeBase    { virtual ~ShapeBase()    = 0; };
 struct LayoutBase   { virtual ~LayoutBase()   = 0; };
 struct AxisBase     { virtual ~AxisBase()     = 0; };
+struct AllocateBase { virtual ~AllocateBase() = 0; };
 struct SizeTypeBase { virtual ~SizeTypeBase() = 0; };
 
 //  The property classes with their templated specific property must hold this specific property as a field for access.
 
-template <LayoutEnum layout>  struct Layout   : LayoutBase   { static constexpr auto value {layout}; };
-template <AxisEnum axis>      struct Axis     : AxisBase     { static constexpr auto value {axis}; };
+template <LayoutEnum layout>  struct Layout   : LayoutBase   { static constexpr auto value {layout};   };
+template <AxisEnum axis>      struct Axis     : AxisBase     { static constexpr auto value {axis};     };
+template <bool allocate>      struct Allocate : AllocateBase { static constexpr auto value {allocate}; };
 template <typename size_type> struct SizeType : SizeTypeBase { typedef size_type type; };
 
 }

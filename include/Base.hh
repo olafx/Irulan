@@ -4,6 +4,8 @@
 #include <type_traits>
 #include "Type.hh"
 
+#include <iostream>
+
 namespace Irulan
 {
 
@@ -144,9 +146,10 @@ public:
 
     //  Using the extractor.
 
-    static constexpr LayoutEnum layout {Extractor<LayoutBase, Layout<conventional>>::type::value};
-    static constexpr AxisEnum   axis   {Extractor<AxisBase,           Axis<column>>::type::value};
-    static constexpr std::array dims   {Extractor<ShapeBase,                double>::dims};
+    static constexpr LayoutEnum layout   {Extractor<LayoutBase, Layout<conventional>>::type::value};
+    static constexpr AxisEnum   axis     {Extractor<AxisBase,           Axis<column>>::type::value};
+    static constexpr bool       allocate {Extractor<AllocateBase,     Allocate<true>>::type::value};
+    static constexpr std::array dims     {Extractor<ShapeBase,                double>::dims};
     typedef typename Extractor<ShapeBase, double>::value_type value_type;
 
 
