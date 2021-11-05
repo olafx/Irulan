@@ -7,7 +7,7 @@ namespace Irulan
 {   namespace Dynamic
     {
 
-//  Dynamic 'Array' has runtime size and heap allocated data.
+//  Dynamic::Array has runtime size and heap allocated data.
 
 template <typename ...Properties>
 struct Array : Base<Properties...>
@@ -40,7 +40,7 @@ private:
 
 private:
 
-    //  Calculate the data size, which depends on 'Layout' and 'dims'.
+    //  Calculate the data size, which depends on Layout and dims.
 
     template <typename ...Dims>
     static size_t size(Dims... dims) noexcept
@@ -56,8 +56,8 @@ private:
 
 private:
 
-    //  Calculates 1D memory index based on nD 'Array' index where n is 'order'.
-    //  Currently only implemented for 'Layout<conventional>'.
+    //  Calculates 1D memory index based on order-dimensional Array index.
+    //  Currently only implemented for Layout<conventional>.
 
     template <size_t level, typename I, typename ...J>
     auto index(I i, J... j) const noexcept
@@ -67,8 +67,8 @@ private:
             return index<level + 1>(j...) * (*this)[level] + i;
     }
 
-    //  Calculates 1D memory index based on nD 'Array' index. Behavior is 'Axis' property dependent if n < 'order'.
-    //  Currently only implemented for 'Layout<conventional>'.
+    //  Calculates 1D memory index based on n-dimensional Array index. Behavior is Axis property dependent if n < order.
+    //  Currently only implemented for Layout<conventional>.
 
     template <size_t level, typename ...I>
     auto index_offset(I... i) const noexcept
@@ -82,20 +82,24 @@ private:
 
 public:
 
-    //  Malloc is used for data memory allocation due to need for future CUDA compatibility.
-
-    template <typename ...Dims, bool allocate_delayed = allocate, std::enable_if_t<allocate_delayed>* = nullptr>
+    template <typename ...Dims,
+        bool allocate_delayed = allocate, std::enable_if_t<allocate_delayed>* = nullptr>
     Array(Dims... dims)
         : dims {static_cast<size_type>(dims)...},
-          data {static_cast<decltype(data)>(malloc(sizeof(decltype(*data)) * size(dims...)))}
-    {   if (data == NULL)
-            throw std::bad_alloc {};
+          data {new value_type[size(dims...)]}
+    {
     }
 
-    template <typename ...Dims, bool allocate_delayed = allocate, std::enable_if_t<!allocate_delayed>* = nullptr>
+    template <typename ...Dims,
+        bool allocate_delayed = allocate, std::enable_if_t<!allocate_delayed>* = nullptr>
     Array(Dims... dims)
         : dims {static_cast<size_type>(dims)...}
     {
+    }
+
+    ~Array()
+    {   if constexpr (allocate)
+            delete[] data;
     }
 
 
@@ -104,12 +108,15 @@ public:
 
     //  Dimension operator.
 
-    template <typename I, typename = std::enable_if_t<std::is_integral_v<I>>>
-    const size_type& operator[](I i) const noexcept
+    template <typename I,
+        typename = std::enable_if_t<std::is_integral_v<I>>>
+    size_type& operator[](I i) noexcept
     {   return dims[i];
     }
-    template <typename I, typename = std::enable_if_t<std::is_integral_v<I>>>
-    size_type& operator[](I i) noexcept
+
+    template <typename I,
+        typename = std::enable_if_t<std::is_integral_v<I>>>
+    const size_type& operator[](I i) const noexcept
     {   return dims[i];
     }
 
@@ -117,12 +124,25 @@ public:
 
 public:
 
-    //  Raw data access.
+    //  Raw data access. For Arrays with Allocate<false>, the raw pointer can be assigned.
 
-    const value_type *& operator()() const noexcept
+    template <bool allocate_delayed = allocate, std::enable_if_t<allocate_delayed>* = nullptr>
+    value_type *operator()() noexcept
     {   return data;
     }
+
+    template <bool allocate_delayed = allocate, std::enable_if_t<allocate_delayed>* = nullptr>
+    const value_type *operator()() const noexcept
+    {   return data;
+    }
+
+    template <bool allocate_delayed = allocate, std::enable_if_t<!allocate_delayed>* = nullptr>
     value_type *& operator()() noexcept
+    {   return data;
+    }
+
+    template <bool allocate_delayed = allocate, std::enable_if_t<!allocate_delayed>* = nullptr>
+    const value_type *& operator()() const noexcept
     {   return data;
     }
 
@@ -131,14 +151,16 @@ public:
 public:
 
     //  Indexing.
-    //  Currently only implemented for 'Layout<conventional>'.
+    //  Currently only implemented for Layout<conventional>.
 
-    template <typename ...I, typename = std::enable_if_t<(std::is_integral_v<I> && ...)>>
+    template <typename ...I,
+        typename = std::enable_if_t<(std::is_integral_v<I> && ...)>>
     value_type& operator()(I... i) noexcept
     {   return (*this)()[index_offset<order - sizeof...(i)>(i...)];
     }
 
-    template <typename ...I, typename = std::enable_if_t<(std::is_integral_v<I> && ...)>>
+    template <typename ...I,
+        typename = std::enable_if_t<(std::is_integral_v<I> && ...)>>
     const value_type& operator()(I... i) const noexcept
     {   return (*this)()[index_offset<order - sizeof...(i)>(i...)];
     }
@@ -155,8 +177,8 @@ public:
         return *this;
     }
 
-    //  Assignment via a 'DeepInitList' does not require said list to be full, and may use the previously defined value
-    //  assignment operator (in case the list's order is less than 'order').
+    //  Assignment via a DeepInitList does not require said list to be full, and may use the previously defined value assignment
+    //  operator (in case the list's order is less than Array order).
 
     Array& operator=(const DeepInitList& list) noexcept
     {   for (size_type i = 0; i < list.size(); i++)

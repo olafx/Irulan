@@ -7,7 +7,7 @@ namespace Irulan
 {   namespace Hybrid
     {
 
-//  Hybrid 'Array' has compile time size and heap allocated data.
+//  Hybrid::Array has compile time size and heap allocated data.
 
 template <typename ...Properties>
 struct Array : Base<Properties...>
@@ -37,28 +37,23 @@ private:
 
 public:
 
-    //  Malloc is used for data memory allocation due to need for future CUDA compatibility.
-
     Array()
-        : data {static_cast<decltype(data)>(malloc(sizeof(decltype(*data))))}
-    {   if (data == NULL)
-            throw std::bad_alloc {};
+        : data {new Static::Array<Properties...>}
+    {
     }
 
     Array(const Array& other)
-        : data {static_cast<decltype(data)>(malloc(sizeof(decltype(*data))))}
-    {   if (data == NULL)
-            throw std::bad_alloc {};
-        else
-            *data = *other.data;
+        : data {new Static::Array<Properties...>}
+    {   *data = *other.data;
     }
 
     Array(const DeepInitList& list)
-        : data {static_cast<decltype(data)>(malloc(sizeof(decltype(*data))))}
-    {   if (data == NULL)
-            throw std::bad_alloc {};
-        else
-            *data = list;
+        : data {new Static::Array<Properties...>}
+    {   *data = list;
+    }
+
+    ~Array()
+    {   delete data;
     }
 
 
@@ -87,7 +82,7 @@ public:
 public:
 
     //  Indexing.
-    //  Currently only implemented for 'Layout<conventional>'.
+    //  Currently only implemented for Layout<conventional>.
 
     template <typename ...I>
     auto& operator()(I... i) noexcept
@@ -110,8 +105,8 @@ public:
         return *this;
     }
 
-    //  Assignment via a 'DeepInitList' does not require said list to be full, and may use the previously defined value
-    //  assignment operator (in case the list's order is less than 'order').
+    //  Assignment via a DeepInitList does not require said list to be full, and may use the previously defined value
+    //  assignment operator (in case the list's order is less than Array order).
 
     Array& operator=(const DeepInitList& list) noexcept
     {   *data = list;

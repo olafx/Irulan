@@ -40,8 +40,6 @@ Compile time size, heap storage. (`new std::array` equivalent.)
 Hybrid::Array<int[2][3]> A {{1, 2}, {3}, {5, 6}};
 ```
 
-Allocation uses `malloc` over `new` due to need for future consistency with CUDA allocation once implemented.
-
 ### Dynamic
 
 Run time size. Compile time order. (`new type[size]` equivalent.)
@@ -53,7 +51,7 @@ Dynamic::Array<int[3]> A {3840, 3840, 3};
 
 Dimensions are stored on stack in the object, not with the rest of the data.
 
-Allocation uses `malloc` over `new` due to need for future consistency with CUDA allocation once implemented.
+
 
 ## Property System
 
@@ -159,6 +157,8 @@ Packed storage, used in e.g. Hermitian matrices and triangular matrices. Only de
 ```C++
 Dynamic::Array<float[3], Layout<packed>> A {3}; // size 10
 ```
+
+
 
 ## Initializer Lists
 
