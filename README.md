@@ -43,7 +43,6 @@ Hybrid::Array<int[2][3]> A {{1, 2}, {3}, {5, 6}};
 ### Dynamic
 
 Run time size. Compile time order. (`new type[size]` equivalent.)
-(Trying to change this to make the order implicit based on number of constructor arguments. Might be impossible.)
 
 ```C++
 Dynamic::Array<int[3]> A {3840, 3840, 3};
