@@ -92,12 +92,15 @@ public:
 
     template <typename ...Dims,
         bool allocate_delayed = allocate, std::enable_if_t<!allocate_delayed>* = nullptr>
-    Array(Dims... dims)
-        : dims {static_cast<size_type>(dims)...}
+    Array(Dims... dims) noexcept
+        : dims {static_cast<size_type>(dims)...},
+          data {NULL}
     {
     }
 
-    ~Array()
+
+
+    ~Array() noexcept
     {   if constexpr (allocate)
             delete[] data;
     }
@@ -135,6 +138,7 @@ public:
     const value_type *operator()() const noexcept
     {   return data;
     }
+
 
     template <bool allocate_delayed = allocate, std::enable_if_t<!allocate_delayed>* = nullptr>
     value_type *& operator()() noexcept

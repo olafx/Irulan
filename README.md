@@ -122,7 +122,14 @@ image_import->SetImportVoidPointer(static_cast<void *>(out()));
 ...
 ```
 
-(In the future it will be possible to set the pointer as well, but I need to look at some examples first where this is useful and from those examples deduce good functionality.)
+Hybrid and dynamic tensors can be used to wrap existing data.
+
+```C++
+Dynamic::Array<float[3], Allocate<false>> A {256, 256, 256};
+float *a = new float[A[0] * A[1] * A[2]];
+A() = a;
+Hybrid::Array<float[256][256][256], Allocate<false>> B {A()};
+```
 
 
 
