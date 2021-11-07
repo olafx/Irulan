@@ -106,7 +106,7 @@ A[2] = 24;
 
 ### Pointer
 
-In the spirit of working in parallel with other libraries, a raw pointer can easily be returned. It can however not be set.
+In the spirit of working in parallel with other libraries, a raw pointer can easily be returned.
 
 ```C++
 #include <fftw3.h>
@@ -122,7 +122,7 @@ image_import->SetImportVoidPointer(static_cast<void *>(out()));
 ...
 ```
 
-Hybrid and dynamic tensors can be used to wrap existing data.
+Hybrid and dynamic tensors can be used to wrap existing data via the same operator.
 
 ```C++
 Dynamic::Array<float[3], Allocate<false>> A {256, 256, 256};
