@@ -54,7 +54,7 @@ private:
 
     template <typename ...I>
     static constexpr void index_validity(I... i) noexcept
-    {   static_assert((std::is_integral_v<I> && ...), "dimension types must be integral");
+    {   static_assert((std::is_integral_v<I> && ...), "index types must be integral");
         static_assert(sizeof...(i) <= order, "must have at most as many indexes as order");
     }
 
@@ -189,18 +189,6 @@ public:
     const value_type& operator()(I... i) const noexcept
     {   index_validity(i...);
         return (*this)()[index_offset<order - sizeof...(i)>(i...)];
-    }
-
-
-
-public:
-
-    //  Assignment via a value will set all data to this value.
-
-    Array& operator=(const value_type& value) noexcept
-    {   for (size_type i = 0; i < (*this)[order - 1]; i++)
-            (*this)(i) = value;
-        return *this;
     }
 };
 

@@ -141,6 +141,18 @@ private:
 
 
 
+private:
+
+    //  Compile time checks for incorrect use.
+
+    template <typename ...I>
+    static constexpr void index_validity(I... i) noexcept
+    {   static_assert((std::is_integral_v<I> && ...), "index types must be integral");
+        static_assert(sizeof...(i) <= order, "must have at most as many indexes as order");
+    }
+
+
+
 public:
 
     Array() noexcept = default;
@@ -158,10 +170,10 @@ public:
 
     //  Dimension operator.
 
-    template <typename I,
-        typename = std::enable_if_t<std::is_integral_v<I>>>
+    template <typename I>
     constexpr const size_type& operator[](I i) const noexcept
-    {   return dims[i];
+    {   index_validity(i);
+        return dims[i];
     }
 
 
@@ -201,8 +213,7 @@ public:
 
     template <typename I, typename ...J>
     constexpr auto& operator()(I i, J... j) noexcept
-    {   static_assert(std::is_integral_v<I>, "index types must be integral");
-        static_assert(sizeof...(j) < order, "must have at most as many indexes as order");
+    {   index_validity(i, j...);
         if constexpr (layout == conventional)
         {   if constexpr (sizeof...(j) == 0)
                 return data.value[i];
@@ -216,8 +227,7 @@ public:
 
     template <typename I, typename ...J>
     constexpr const auto& operator()(I i, J... j) const noexcept
-    {   static_assert(std::is_integral_v<I>, "index types must be integral");
-        static_assert(sizeof...(j) < order, "must have at most as many indexes as order");
+    {   index_validity(i, j...);
         if constexpr (layout == conventional)
         {   if constexpr (sizeof...(j) == 0)
                 return data.value[i];
@@ -232,14 +242,6 @@ public:
 
 
 public:
-
-    //  Assignment via a value will set all data to this value.
-
-    constexpr Array& operator=(const value_type& value) noexcept
-    {   for (size_type i = 0; i < (*this)[order - 1]; i++)
-            (*this)(i) = value;
-        return *this;
-    }
 
     //  Assignment via a DeepInitList does not require said list to be full, and may use the previously defined value assignment
     //  operator (in case the list's order is less than Array's order).
