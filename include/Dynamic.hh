@@ -13,21 +13,21 @@ template <typename ...Properties>
 struct Array : Base<Properties...>
 {
 
-public:
+private:
 
     using Base_ = Base<Properties...>;
+    using Base_::combinations;
+
+
+
+public:
+
     using Base_::layout,
           Base_::axis,
           Base_::allocate,
           typename Base_::size_type,
           typename Base_::value_type;
     static constexpr size_t order = Base_::dims[0];
-
-
-
-private:
-
-    using Base_::combinations;
 
 
 
@@ -133,15 +133,13 @@ public:
 
     //  Dimension operator.
 
-    template <typename I,
-        typename = std::enable_if_t<std::is_integral_v<I>>>
+    template <typename I>
     size_type& operator[](I i) noexcept
     {   index_validity(i);
         return dims[i];
     }
 
-    template <typename I,
-        typename = std::enable_if_t<std::is_integral_v<I>>>
+    template <typename I>
     const size_type& operator[](I i) const noexcept
     {   index_validity(i);
         return dims[i];

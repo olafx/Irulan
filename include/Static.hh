@@ -14,7 +14,6 @@ struct Array : public Base<Properties...>
 private:
 
     using Base_ = Base<Properties...>;
-
     using Base_::dims,
           Base_::combinations;
 
