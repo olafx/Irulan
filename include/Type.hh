@@ -13,7 +13,9 @@ namespace Irulan
 
 //  Shape property is special and only needs a base to distinguish it from other properties.
 
-struct ShapeBase {};
+struct ShapeBase
+{
+};
 
 
 
@@ -22,7 +24,9 @@ struct ShapeBase {};
 
 enum LayoutEnum {conventional, packed};
 
-struct LayoutBase {};
+struct LayoutBase
+{
+};
 
 template <LayoutEnum layout>
 struct Layout : LayoutBase
@@ -35,7 +39,9 @@ struct Layout : LayoutBase
 
 enum AxisEnum {column};
 
-struct AxisBase {};
+struct AxisBase
+{
+};
 
 template <AxisEnum axis>
 struct Axis : AxisBase
@@ -46,7 +52,9 @@ struct Axis : AxisBase
 
 //  The allocate property is used to distinguish the usual Array's that hold data from ones that wrap existing data.
 
-struct AllocateBase {};
+struct AllocateBase
+{
+};
 
 template <bool allocate>
 struct Allocate : AllocateBase

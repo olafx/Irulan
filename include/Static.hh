@@ -13,89 +13,26 @@ struct Array : public Base<Properties...>
 
 private:
 
-    using Base<Properties...>::dims,
-          Base<Properties...>::combinations;
+    using Base_ = Base<Properties...>;
+
+    using Base_::dims,
+          Base_::combinations;
 
 
 
 public:
 
-    using Base<Properties...>::layout,
-          Base<Properties...>::axis,
-          typename Base<Properties...>::size_type,
-          typename Base<Properties...>::value_type;
+    using Base_::layout,
+          Base_::axis,
+          typename Base_::size_type,
+          typename Base_::value_type;
     static constexpr size_t order = dims.size();
 
 
 
 private:
 
-    using DeepInitList = typename Base<Properties...>::template DeepInitList<order, value_type>::type;
-
-
-
-private:
-
-    //  The elements of Array can be seen as lower order Arrays. These have the same properties, except for the shape property.
-    //  Create an Array type with the same Properties, except set the shape to the shape given by Modify, which is contained in
-    //  ShapeModifier.
-
-    //  Recursion case for when B is not the shape property.
-
-    template <typename, typename B, typename ...A>
-    struct ShapeModifier
-    {   template <typename shape, typename ...C>
-        struct Modify
-        {   using type = typename ShapeModifier<void, A...>::template Modify<shape, C..., B>::type;
-        };
-    };
-
-    //  Recursion case for when B is the shape property.
-
-    template <typename B, typename ...A>
-    struct ShapeModifier<std::enable_if_t<std::is_array_v<B>>, B, A...>
-    {   template <typename shape, typename ...C>
-        struct Modify
-        {   using type = typename ShapeModifier<void, A...>::template Modify<shape, C..., shape>::type;
-        };
-    };
-
-    //  Base case for when B is not the shape property.
-
-    template <typename Enabled, typename B>
-    struct ShapeModifier<Enabled, B>
-    {   template <typename shape, typename ...C>
-        struct Modify
-        {   using type = Array<C..., B>;
-        };
-    };
-
-    //  Base case for when B is the shape property.
-
-    template <typename B>
-    struct ShapeModifier<std::enable_if_t<std::is_array_v<B>>, B>
-    {   template <typename shape, typename ...C>
-        struct Modify
-        {   using type = Array<C..., shape>;
-        };
-    };
-
-
-
-private:
-
-    //  Create the shape of the Array this Array can be seen to contain.
-    //  The result depends on whether storage is row or column major. At the moment only column major is supported.
-
-    template <size_t length, typename T, typename = void>
-    struct CreateShape
-    {   using type = typename CreateShape<length, T[dims[length - 1 - std::rank_v<T>]]>::type;
-    };
-
-    template <size_t length, typename T>
-    struct CreateShape <length, T, std::enable_if_t<std::rank_v<T> == length>>
-    {   using type = T;
-    };
+    using DeepInitList = typename Base_::template DeepInitList<order, value_type>::type;
 
 
 
@@ -104,21 +41,84 @@ private:
     //  Create the Data type, which is the type of the data this Array stores.
     //  This depends on properties like Layout and Axis.
 
+
     //  Unused default.
 
     template <size_t order, LayoutEnum layout,
         typename = void>
     struct Data
-    {};
+    {
+    };
+
 
     //  Layout<conventional> recursion case.
 
     template <size_t order>
     struct Data<order, conventional,
         std::enable_if_t<order != 1>>
-    {   typename ShapeModifier<void, Properties...>::template
-            Modify<typename CreateShape<order - 1, value_type>::type>::type value[dims[order - 1]];
+    {
+        //  The elements of Array can be seen as lower order Arrays. These have the same properties, except for the shape property.
+        //  Create an Array type with the same Properties, except set the shape to the one given by ShapeModifier::Set.
+
+        //  Recursion case for when B is not the shape property.
+
+        template <typename, typename B, typename ...A>
+        struct ShapeModifier
+        {   template <typename shape, typename ...C>
+            struct Set
+            {   using type = typename ShapeModifier<void, A...>::template Set<shape, C..., B>::type;
+            };
+        };
+
+        //  Recursion case for when B is the shape property.
+
+        template <typename B, typename ...A>
+        struct ShapeModifier<std::enable_if_t<std::is_array_v<B>>, B, A...>
+        {   template <typename shape, typename ...C>
+            struct Set
+            {   using type = typename ShapeModifier<void, A...>::template Set<shape, C..., shape>::type;
+            };
+        };
+
+        //  Base case for when B is not the shape property.
+
+        template <typename Enabled, typename B>
+        struct ShapeModifier<Enabled, B>
+        {   template <typename shape, typename ...C>
+            struct Set
+            {   using type = Array<C..., B>;
+            };
+        };
+
+        //  Base case for when B is the shape property.
+
+        template <typename B>
+        struct ShapeModifier<std::enable_if_t<std::is_array_v<B>>, B>
+        {   template <typename shape, typename ...C>
+            struct Set
+            {   using type = Array<C..., shape>;
+            };
+        };
+
+        //  Create the shape of the Array this Array can be seen to contain.
+
+        template <size_t length, typename T, typename = void>
+        struct CreateShape
+        {   using type = typename CreateShape<length, T[dims[length - 1 - std::rank_v<T>]]>::type;
+        };
+
+        template <size_t length, typename T>
+        struct CreateShape<length, T, std::enable_if_t<std::rank_v<T> == length>>
+        {   using type = T;
+        };
+
+        using ShapeModifier_ = ShapeModifier<void, Properties...>;
+        using ElemShape = typename CreateShape<order - 1, value_type>::type;
+        using ElemType = typename ShapeModifier_::template Set<ElemShape>::type;
+
+        ElemType value[dims[order - 1]];
     };
+
 
     //  Layout<conventional> base case.
 
@@ -128,12 +128,14 @@ private:
     {   value_type value[dims[0]];
     };
 
+
     //  Layout<packed> case.
 
     template <size_t order>
     struct Data<order, packed>
     {   value_type value[combinations(order + dims[0] - 1, order)];
     };
+
 
     Data<order, layout> data;
 

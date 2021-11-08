@@ -32,7 +32,7 @@ protected:
         //  The std::true_type inheritance reflects that there are no duplicate properties of Base.
 
         template <typename ...>
-        struct Find
+        struct Get
             : std::true_type
         {   //  The search result is Default.
             using type = Default;
@@ -42,9 +42,9 @@ protected:
         //  The std::false_type inheritance reflects that no more properties inheriting from Base are allowed.
 
         template <typename A, typename ...B>
-        struct Find<std::enable_if_t<std::is_base_of_v<Base, A>>, A, B...>
+        struct Get<std::enable_if_t<std::is_base_of_v<Base, A>>, A, B...>
             : std::false_type
-        {   static_assert(Find<void, B...> {}, "multiple properties of the same type not allowed");
+        {   static_assert(Get<void, B...> {}, "multiple properties of the same type not allowed");
             //  The search result is A.
             using type = A;
         };
@@ -53,14 +53,14 @@ protected:
         //  The boolean type inheritance is carried through recursively from the inside out.
 
         template <typename A, typename ...B>
-        struct Find<std::enable_if_t<!std::is_base_of_v<Base, A>>, A, B...>
-            : std::conditional_t<Find<void, B...> {}, std::true_type, std::false_type>
+        struct Get<std::enable_if_t<!std::is_base_of_v<Base, A>>, A, B...>
+            : std::conditional_t<Get<void, B...> {}, std::true_type, std::false_type>
         {   //  The search result is carried through recursively from the inside out.
-            using type = typename Find<void, B...>::type;
+            using type = typename Get<void, B...>::type;
         };
 
-        //  The result of the extractor is the result of the finder.
-        using type = typename Find<void, Properties...>::type;
+        //  The result of the extractor is the result of the getter.
+        using type = typename Get<void, Properties...>::type;
     };
 
     //  Extract the size type already, because it's needed in the definition of the next extractor.
@@ -81,7 +81,7 @@ protected:
         //  The std::true_type inheritance reflects that there are no duplicate array type properties.
 
         template <typename ...>
-        struct Find
+        struct Get
             : std::true_type
         {   //  The search result is Default, and the shape is a 1st order array of length 1.
             using value_type = Default;
@@ -92,7 +92,7 @@ protected:
         //  The std::false_type inheritance reflects that no other array type properties are allowed.
 
         template <typename A, typename ...B>
-        struct Find<std::enable_if_t<std::is_array_v<A>>, A, B...>
+        struct Get<std::enable_if_t<std::is_array_v<A>>, A, B...>
             : std::false_type
         {
             //  Deduce the shape, which is the shape of the multidimensional array type.
@@ -114,7 +114,7 @@ protected:
                 static constexpr std::array value {Dims<void, std::remove_extent_t<shape>, a..., std::extent_v<shape>>::value};
             };
 
-            static_assert(Find<void, B...> {}, "multiple properties of the same type not allowed");
+            static_assert(Get<void, B...> {}, "multiple properties of the same type not allowed");
 
             //  Deduce the data type, which is the element type of the multidimensional array type. This is a search result.
             using value_type = std::remove_all_extents_t<A>;
@@ -126,16 +126,16 @@ protected:
         //  The boolean type inheritance is carried through recursively from the inside out.
 
         template <typename A, typename ...B>
-        struct Find<std::enable_if_t<!std::is_array_v<A>>, A, B...>
-            : std::conditional_t<Find<void, B...> {}, std::true_type, std::false_type>
+        struct Get<std::enable_if_t<!std::is_array_v<A>>, A, B...>
+            : std::conditional_t<Get<void, B...> {}, std::true_type, std::false_type>
         {   //  The search result is carried through recursively from the inside out.
-            using value_type = typename Find<void, B...>::value_type;
-            static constexpr std::array dims {Find<void, B...>::dims};
+            using value_type = typename Get<void, B...>::value_type;
+            static constexpr std::array dims {Get<void, B...>::dims};
         };
 
-        //  The result of the extractor is the result of the finder.
-        using value_type = typename Find<void, Properties...>::value_type;
-        static constexpr std::array dims {Find<void, Properties...>::dims};
+        //  The result of the extractor is the result of the getter.
+        using value_type = typename Get<void, Properties...>::value_type;
+        static constexpr std::array dims {Get<void, Properties...>::dims};
     };
 
 
@@ -145,10 +145,11 @@ protected:
     //  Using the extractor.
 
     static constexpr LayoutEnum layout   {Extractor<LayoutBase, Layout<conventional>>::type::value};
-    static constexpr AxisEnum   axis     {Extractor<AxisBase,           Axis<column>>::type::value};
-    static constexpr bool       allocate {Extractor<AllocateBase,     Allocate<true>>::type::value};
-    static constexpr std::array dims     {Extractor<ShapeBase,                double>::dims};
+    static constexpr AxisEnum   axis     {Extractor<AxisBase, Axis<column>>          ::type::value};
+    static constexpr bool       allocate {Extractor<AllocateBase, Allocate<true>>    ::type::value};
+    static constexpr std::array dims     {Extractor<ShapeBase, double>::dims};
     using value_type = typename Extractor<ShapeBase, double>::value_type;
+
 
 
 protected:

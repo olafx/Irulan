@@ -15,19 +15,21 @@ struct Array : Base<Properties...>
 
 public:
 
-    using Base<Properties...>::layout,
-          Base<Properties...>::axis,
-          Base<Properties...>::allocate,
-          typename Base<Properties...>::size_type,
-          typename Base<Properties...>::value_type;
-    static constexpr size_t order = Base<Properties...>::dims[0];
+    using Base_ = Base<Properties...>;
+
+    using Base_::layout,
+          Base_::axis,
+          Base_::allocate,
+          typename Base_::size_type,
+          typename Base_::value_type;
+    static constexpr size_t order = Base_::dims[0];
 
 
 
 private:
 
-    using Base<Properties...>::combinations;
-    using DeepInitList = typename Base<Properties...>::template DeepInitList<order, value_type>::type;
+    using Base_::combinations;
+    using DeepInitList = typename Base_::template DeepInitList<order, value_type>::type;
 
 
 
