@@ -16,7 +16,6 @@ struct Array : Base<Properties...>
 public:
 
     using Base_ = Base<Properties...>;
-
     using Base_::layout,
           Base_::axis,
           Base_::allocate,
@@ -29,7 +28,6 @@ public:
 private:
 
     using Base_::combinations;
-    using DeepInitList = typename Base_::template DeepInitList<order, value_type>::type;
 
 
 
@@ -37,6 +35,28 @@ private:
 
     size_type dims[order];
     value_type *data;
+
+
+
+private:
+
+    //  Compile time checks for incorrect use.
+
+    template <typename ...Dims>
+    constexpr void dims_validity(Dims... dims) noexcept
+    {   static_assert((std::is_integral_v<Dims> && ...), "dimension types must be integral");
+        static_assert((std::is_convertible_v<Dims, size_type> && ...), "dimension types must be convertible to size type");
+        if constexpr (layout == conventional)
+            static_assert(sizeof...(dims) == order, "number of given dimensions must equal order");
+        else if constexpr (layout == packed)
+            static_assert(sizeof...(dims) == 1, "packed arrays have equal sides so need only one dimension");
+    }
+
+    template <typename ...I>
+    static constexpr void index_validity(I... i) noexcept
+    {   static_assert((std::is_integral_v<I> && ...), "dimension types must be integral");
+        static_assert(sizeof...(i) <= order, "must have at most as many indexes as order");
+    }
 
 
 
@@ -89,7 +109,7 @@ public:
     Array(Dims... dims)
         : dims {static_cast<size_type>(dims)...},
           data {new value_type[size(dims...)]}
-    {
+    {   dims_validity(dims...);
     }
 
     template <typename ...Dims,
@@ -97,7 +117,7 @@ public:
     Array(Dims... dims) noexcept
         : dims {static_cast<size_type>(dims)...},
           data {NULL}
-    {
+    {   dims_validity(dims...);
     }
 
 
@@ -116,13 +136,15 @@ public:
     template <typename I,
         typename = std::enable_if_t<std::is_integral_v<I>>>
     size_type& operator[](I i) noexcept
-    {   return dims[i];
+    {   index_validity(i);
+        return dims[i];
     }
 
     template <typename I,
         typename = std::enable_if_t<std::is_integral_v<I>>>
     const size_type& operator[](I i) const noexcept
-    {   return dims[i];
+    {   index_validity(i);
+        return dims[i];
     }
 
 
@@ -131,23 +153,21 @@ public:
 
     //  Raw data access. For Arrays with Allocate<false>, the raw pointer can be assigned.
 
-    template <bool allocate_delayed = allocate, std::enable_if_t<allocate_delayed>* = nullptr>
+    template <bool allocate_delayed = allocate, typename = std::enable_if_t<allocate_delayed>>
     value_type *operator()() noexcept
     {   return data;
     }
 
-    template <bool allocate_delayed = allocate, std::enable_if_t<allocate_delayed>* = nullptr>
+    template <bool allocate_delayed = allocate, typename = std::enable_if_t<allocate_delayed>>
     const value_type *operator()() const noexcept
     {   return data;
     }
 
 
-    template <bool allocate_delayed = allocate, std::enable_if_t<!allocate_delayed>* = nullptr>
     value_type *& operator()() noexcept
     {   return data;
     }
 
-    template <bool allocate_delayed = allocate, std::enable_if_t<!allocate_delayed>* = nullptr>
     const value_type *& operator()() const noexcept
     {   return data;
     }
@@ -159,16 +179,16 @@ public:
     //  Indexing.
     //  Currently only implemented for Layout<conventional>.
 
-    template <typename ...I,
-        typename = std::enable_if_t<(std::is_integral_v<I> && ...)>>
+    template <typename ...I>
     value_type& operator()(I... i) noexcept
-    {   return (*this)()[index_offset<order - sizeof...(i)>(i...)];
+    {   index_validity(i...);
+        return (*this)()[index_offset<order - sizeof...(i)>(i...)];
     }
 
-    template <typename ...I,
-        typename = std::enable_if_t<(std::is_integral_v<I> && ...)>>
+    template <typename ...I>
     const value_type& operator()(I... i) const noexcept
-    {   return (*this)()[index_offset<order - sizeof...(i)>(i...)];
+    {   index_validity(i...);
+        return (*this)()[index_offset<order - sizeof...(i)>(i...)];
     }
 
 
@@ -180,15 +200,6 @@ public:
     Array& operator=(const value_type& value) noexcept
     {   for (size_type i = 0; i < (*this)[order - 1]; i++)
             (*this)(i) = value;
-        return *this;
-    }
-
-    //  Assignment via a DeepInitList does not require said list to be full, and may use the previously defined value assignment
-    //  operator (in case the list's order is less than Array order).
-
-    Array& operator=(const DeepInitList& list) noexcept
-    {   for (size_type i = 0; i < list.size(); i++)
-            (*this)(i) = list.begin()[i];
         return *this;
     }
 };

@@ -82,7 +82,7 @@ int *B1 = &B(1);
 The square bracket operator is used to get dimensions.
 
 ```C++
-Hybrid:Array<int[3][4][5]> A;
+Static:Array<int[3][4][5]> A;
 A[1]; // 4
 ```
 
@@ -164,7 +164,7 @@ Dynamic::Array<float[3], Layout<packed>> A {3}; // size 10
 Initializer lists are used not only for initialization, but also for assignment.
 
 ```C++
-Hybrid::Array<int[2][2][2]> A {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
+Static::Array<int[2][2][2]> A {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
 A(1, 1) = {-1, -2};
 ```
 

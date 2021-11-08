@@ -118,6 +118,8 @@ protected:
 
             //  Deduce the data type, which is the element type of the multidimensional array type. This is a search result.
             using value_type = std::remove_all_extents_t<A>;
+            static_assert(std::is_trivially_default_constructible_v<value_type>,
+                "data type must be trivially default constructible to maintain predictable memory layout");
             //  The other search result is the shape.
             static constexpr std::array dims {Dims<void, A>::value};
         };

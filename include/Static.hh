@@ -199,10 +199,11 @@ public:
     //  Indexing.
     //  Currently only implemented for Layout<conventional>.
 
-    template <typename I, typename ...J,
-        typename = std::enable_if_t<std::is_integral_v<I>>>
+    template <typename I, typename ...J>
     constexpr auto& operator()(I i, J... j) noexcept
-    {   if constexpr (layout == conventional)
+    {   static_assert(std::is_integral_v<I>, "index types must be integral");
+        static_assert(sizeof...(j) < order, "must have at most as many indexes as order");
+        if constexpr (layout == conventional)
         {   if constexpr (sizeof...(j) == 0)
                 return data.value[i];
             else
@@ -213,10 +214,11 @@ public:
             return;
     }
 
-    template <typename I, typename ...J,
-        typename = std::enable_if_t<std::is_integral_v<I>>>
+    template <typename I, typename ...J>
     constexpr const auto& operator()(I i, J... j) const noexcept
-    {   if constexpr (layout == conventional)
+    {   static_assert(std::is_integral_v<I>, "index types must be integral");
+        static_assert(sizeof...(j) < order, "must have at most as many indexes as order");
+        if constexpr (layout == conventional)
         {   if constexpr (sizeof...(j) == 0)
                 return data.value[i];
             else
