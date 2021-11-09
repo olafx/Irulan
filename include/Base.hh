@@ -66,7 +66,6 @@ protected:
     //  Extract the size type already, because it's needed in the definition of the next extractor.
 
     using size_type = typename Extractor<SizeTypeBase, SizeType<size_t>>::type::type;
-    static constexpr LayoutEnum layout {Extractor<LayoutBase, Layout<conventional>>::type::value};
 
     //  Shape extraction needs its own specialization because this property works differently from the rest.
     //  The Default type reflects the default type of the data, which is not the shape.
@@ -104,6 +103,7 @@ protected:
             template <typename, typename shape, size_type ...a>
             struct Dims
             {   //  The result is an array containing the full shape.
+                if constexpr ()
                 static constexpr std::array value {a...};
             };
 
@@ -147,6 +147,7 @@ protected:
 
     //  Using the extractor.
 
+    static constexpr LayoutEnum layout   {Extractor<LayoutBase, Layout<conventional>>::type::value};
     static constexpr AxisEnum   axis     {Extractor<AxisBase, Axis<column>>          ::type::value};
     static constexpr bool       allocate {Extractor<AllocateBase, Allocate<true>>    ::type::value};
     static constexpr std::array dims     {Extractor<ShapeBase, double>::dims};
