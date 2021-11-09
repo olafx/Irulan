@@ -33,6 +33,14 @@ public:
 
 private:
 
+    //  Some early compile time checks for incorrect use.
+
+    static_assert(Base_::dims.size() == 1, "dynamic arrays template their order, and should only have one");
+
+
+
+private:
+
     size_type dims[order];
     value_type *data;
 

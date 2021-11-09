@@ -31,6 +31,19 @@ public:
 
 private:
 
+    //  Some early compile time checks for incorrect use.
+
+    static_assert(layout != packed || []()
+    {   for (size_t i = 1; i < order; i++)
+            if (dims[0] != dims[i])
+                return false;
+        return true;
+    }(), "packed arrays should have equal sides");
+
+
+
+private:
+
     using DeepInitList = typename Base_::template DeepInitList<order, value_type>::type;
 
 
