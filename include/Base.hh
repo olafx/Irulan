@@ -103,7 +103,6 @@ protected:
             template <typename, typename shape, size_type ...a>
             struct Dims
             {   //  The result is an array containing the full shape.
-                if constexpr ()
                 static constexpr std::array value {a...};
             };
 
@@ -183,6 +182,81 @@ protected:
             result = (n - i + 1) * result / i;
         return result;
     }
+
+
+
+protected:
+
+    //  Helper functions for packed indexing.
+
+    struct PackedIndexing
+    {
+        //  Evaluates part of a factorial.
+
+        template <size_t a, size_t b, typename I>
+        static auto A_inc(I i)
+        {   if constexpr (a == b)
+                return i + a;
+            else if constexpr (a == 0)
+                return i * A_inc<a + 1, b>(i);
+            else
+                return (i + a) * A_inc<a + 1, b>(i);
+        }
+
+        //  Evaluates part of a more complicate factorial-like expression.
+
+        template <size_t a, size_t b, typename I>
+        static auto A_dec(size_type n, I i)
+        {   if constexpr (b == 0)
+                return i;
+            else if constexpr (a == b)
+                return a - 2 + 2 * n - i;
+            else if constexpr (a == 0)
+                return i * A_dec<a + 1, b>(n, i);
+            else
+                return (a - 2 + 2 * n - i) * A_dec<a + 1, b>(n, i);
+        }
+
+        //  Dividdes by part of a factorial.
+
+        template <size_t b, typename I>
+        static auto B(I i)
+        {   if constexpr (b == 0)
+                return i;
+            else
+                return B<b - 1>(i / (b + 1));
+        }
+
+        //  Index solution for increasing packed data:
+        //        i
+        //      + j * (j + 1) / 2
+        //      + k * (k + 1) * (k + 2) / (2 * 3)
+        //      + l * (l + 1) * (l + 2) * (l + 3) / (2 * 3 * 4)
+        //      + ...
+
+        template <size_t a, typename I, typename ...J>
+        static auto C_inc(I i, J... j)
+        {   if constexpr (sizeof...(j) == 0)
+                return B<a>(A_inc<0, a>(i));
+            else
+                return B<a>(A_inc<0, a>(i)) + C_inc<a + 1>(j...);
+        }
+
+        //  Index solution for decreasing packed data:
+        //        i
+        //      + j * (2 * n - j - 1) / 2
+        //      + k * (2 * n - k - 1) * (2 * n - k) / (2 * 3)
+        //      + l * (2 * n - l - 1) * (2 * n - l) * (2 * n - l + 1) / (2 * 3 * 4)
+        //      + ...
+
+        template <size_t a, typename I, typename ...J>
+        static auto C_dec(size_type n, I i, J... j)
+        {   if constexpr (sizeof...(j) == 0)
+                return B<a>(A_dec<0, a>(n, i));
+            else
+                return B<a>(A_dec<0, a>(n, i)) + C_dec<a + 1>(n, j...);
+        }
+    };
 };
 
 }

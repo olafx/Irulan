@@ -14,8 +14,7 @@ struct Array : public Base<Properties...>
 private:
 
     using Base_ = Base<Properties...>;
-    using Base_::dims,
-          Base_::combinations;
+    using Base_::dims;
 
 
 
@@ -33,7 +32,7 @@ private:
 
     //  Some early compile time checks for incorrect use.
 
-    static_assert(layout != packed || []()
+    static_assert((layout != packed_inc && layout != packed_dec) || []()
     {   for (size_t i = 1; i < order; i++)
             if (dims[0] != dims[i])
                 return false;
@@ -141,11 +140,18 @@ private:
     };
 
 
-    //  Layout<packed> case.
+    //  Layout<packed_inc> case.
 
     template <size_t order>
-    struct Data<order, packed>
-    {   value_type value[combinations(order + dims[0] - 1, order)];
+    struct Data<order, packed_inc>
+    {   value_type value[Base_::combinations(order + dims[0] - 1, order)];
+    };
+
+    //  Layout<packed_dec> case.
+
+    template <size_t order>
+    struct Data<order, packed_dec>
+    {   value_type value[Base_::combinations(order + dims[0] - 1, order)];
     };
 
 
@@ -201,7 +207,7 @@ public:
             else
                 return data.value[0]();
         }
-        else if constexpr (layout == packed)
+        else if constexpr (layout == packed_inc || layout == packed_dec)
             return data.value;
     }
 
@@ -212,7 +218,7 @@ public:
             else
                 return data.value[0]();
         }
-        else if constexpr (layout == packed)
+        else if constexpr (layout == packed_inc || layout == packed_dec)
             return data.value;
     }
 
@@ -232,9 +238,12 @@ public:
             else
                 return (*this)(j...)(i);
         }
-        else if constexpr (layout == packed)
-            //  TODO
-            return;
+        else if constexpr ((layout == packed_inc || layout == packed_dec) && sizeof...(j) + 1 != order)
+            return (*this)(0, i, j...);
+        else if constexpr (layout == packed_inc)
+            return data.value[Base_::PackedIndexing::template C_inc<0>(i, j...)];
+        else if constexpr (layout == packed_dec)
+            return data.value[Base_::PackedIndexing::template C_dec<0>((*this)[0], i, j...)];
     }
 
     template <typename I, typename ...J>
@@ -246,9 +255,12 @@ public:
             else
                 return (*this)(j...)(i);
         }
-        else if constexpr (layout == packed)
-            //  TODO
-            return;
+        else if constexpr ((layout == packed_inc || layout == packed_dec) && sizeof...(j) + 1 != order)
+            return (*this)(0, i, j...);
+        else if constexpr (layout == packed_inc)
+            return data.value[Base_::PackedIndexing::template C_inc<0>(i, j...)];
+        else if constexpr (layout == packed_dec)
+            return data.value[Base_::PackedIndexing::template C_dec<0>((*this)[0], i, j...)];
     }
 
 

@@ -7,7 +7,7 @@ namespace Irulan
 //  types of their own. Sometimes the properties aren't directly given as a type (e.g. the shape).
 //  The property classes with their templated specific property must hold this specific property as a field for accessibility.
 //  Properties are given a base type they inherit from. This way different specific properties of the same property
-//  (e.g. Layout<conventional> and Layout<packed>) can both be interpreted as being of the same property (e.g. Layout).
+//  (e.g. Layout<conventional> and Layout<packed_inc>) can both be interpreted as being of the same property (e.g. Layout).
 
 
 
@@ -20,9 +20,12 @@ struct ShapeBase
 
 
 //  The data layout, e.g. conventional for general matrices and packed for symmetric matrices. Layout does not refer to matrix
-//  type, e.g. symmetric and square triangular matrices both have a packed layout.
+//  type, e.g. symmetric and square triangular matrices both have a packed layout. The packed_inc type is for packed storage
+//  with an increasing number of elements per section, and packed_dec for decreasing. They're effectively the same, only the
+//  indexing is different. The former is used for e.g. upper triangular storage for column major matrices, but also lower
+//  triangular storage for row major matrices.
 
-enum LayoutEnum {conventional, packed};
+enum LayoutEnum {conventional, packed_inc, packed_dec};
 
 struct LayoutBase
 {

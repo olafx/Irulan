@@ -4,13 +4,19 @@
 
 **This project is WIP!**
 
-I wrote this library to make my numerical codes easier to write in CUDA/C++.
+I wrote this library to make numerical codes easier to write in CUDA/C++.
 
 It provides tensor data structures, completely recursively defined, and of various layouts as to work in parallel with CBLAS, cuBLAS, LAPACK, etc.
 
 What sets this library apart from other tensor libraries is twofold:
-- Total control over data layout and what is and isn't compile time.
+- Total control over data.
 - No math.
+
+So it's really a tool for data oriented design.
+
+```C++
+using namespace Irulan;
+```
 
 
 
@@ -18,13 +24,13 @@ What sets this library apart from other tensor libraries is twofold:
 
 ### Static
 
-Compile time size, direct storage (stack). (`std::array` equivalent.)
+Compile time size, direct storage (stack).
 
 ```C++
 Static::Array<int[3][4][5][6]> A;
 ```
 
-For regular dense tensors, stores a C-style array of lower order tensors.
+For regular dense tensors, this stores a C-style array of lower order tensors, so you get nice indexed types.
 
 ```C++
 Static::Array<int[3][4]> C = A(0, 0);
@@ -32,7 +38,7 @@ Static::Array<int[3][4]> C = A(0, 0);
 
 ### Dynamic
 
-Run time size. Compile time order. (`new type[size]` equivalent.)
+Run time size. Compile time order.
 
 ```C++
 Dynamic::Array<int[3]> A {3840, 3840, 3};
@@ -47,9 +53,10 @@ Dimensions are stored on stack in the object. Data is stored on heap.
 Properties are templated. They can be given in any order. All have implicit defaults.
 
 ```C++
-Static:Array<int[3]> {};
-Static:Array<int[3], Layout<packed>> {};
-Static:Array<Layout<packed>, int[3], Allocate<false>> {};
+Static::Array<int[3]> {};
+Static::Array<int[3], Layout<conventional>> {};
+Static::Array<Layout<conventional>, SizeType<size_t>, int[3], Allocate<true>> {};
+//  each of these can safely be reinterpret casted to the type of another
 ```
 
 
@@ -61,7 +68,7 @@ Static:Array<Layout<packed>, int[3], Allocate<false>> {};
 Elements are accessed by Fortran-style bracket indexing (except 0-based).
 
 ```C++
-Static::Tensor<float[3][4]> A;
+Static::Array<float[3][4]> A;
 A(0, 1) = 3;
 ```
 
@@ -82,7 +89,7 @@ int *B1 = &B(1);
 The square bracket operator is used to get dimensions.
 
 ```C++
-Static:Array<int[3][4][5]> A;
+Static::Array<int[3][4][5]> A;
 A[1]; // 4
 ```
 
@@ -151,10 +158,18 @@ Dynamic::Array<float[3], Layout<conventional>> A {3, 4, 5}; // size 60
 
 Packed storage, used in e.g. Hermitian matrices and triangular matrices. Only defined for symmetric storage.
 
-*Partially implemented; size is correct and generalized to any number of dimensions, indexing is incomplete.*
+Comes in two flavors: `packed_inc` and `packed_dec`. The difference lies in how they're supposed to be indexed.
+
+Increasing packed is for e.g. upper triangular column major storage; the first major piece of data is the 1st column, containing only one element.
+
+Decreasing packed is for e.g. lower triangular column major storage; the first major piece of data is the 1st column, which is the column with the largest length.
+
+*Understand once more that this is a datastructure library, not a math library. For symmetric matrices the value at `(i, j)` is the same as that at `(j, i)`, but for complex Hermitian matrices it isn't. Both use packed storage. Naturally then, don't expect `(i, j)` to point to `(j, i)`. Only the indexes in the generalized upper triangle for `packed_inc` and lower triangle for `packed_dec` have meaning (assuming column major axis, for row major it's flipped). This also means that the indexing math used is perfectly optimal as it doesn't have to account for each half space.*
 
 ```C++
-Dynamic::Array<float[3], Layout<packed>> A {3}; // size 10
+Dynamic::Array<float[3], Layout<packed_inc>> A {3}; // allocates 10 floats
+A(0, 1, 0); // this is part of the generalized upper triangle. no matter the order, no matter the application, this compiles to the perfect index equation
+A(1, 0, 0); // this is not part of the generalized upper triangle, so this access is incorrect usage
 ```
 
 
@@ -168,8 +183,19 @@ Static::Array<int[2][2][2]> A {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
 A(1, 1) = {-1, -2};
 ```
 
-It's possible to make `constexpr` tensors in this way.
+This does not exist for our convenience. It exists to be able to make a `constexpr` tensor. (That's why it's not available in `Dynamic::Array`.)
 
 ```C++
 constexpr Static::Array<int[2][2]> B {{1, 2}, {3, 4}};
+```
+
+
+
+## Size Type
+
+Even the element type of the array that stores the dimensions of a `Dynamic::Array` can be specified. By default, the type is `size_t`. (For `Static::Array` too but that doesn't really do anything.)
+
+```C++
+sizeof(Dynamic::Array<float[3]>); // 32 bytes on my system
+sizeof(Dynamic::Array<float[3], SizeType<uint32_t>>); // 24 bytes on my system
 ```

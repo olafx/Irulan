@@ -16,7 +16,6 @@ struct Array : Base<Properties...>
 private:
 
     using Base_ = Base<Properties...>;
-    using Base_::combinations;
 
 
 
@@ -41,8 +40,8 @@ private:
 
 private:
 
-    size_type dims[order];
     value_type *data;
+    size_type dims[order];
 
 
 
@@ -56,7 +55,7 @@ private:
         static_assert((std::is_convertible_v<Dims, size_type> && ...), "dimension types must be convertible to size type");
         if constexpr (layout == conventional)
             static_assert(sizeof...(dims) == order, "number of given dimensions must equal order");
-        else if constexpr (layout == packed)
+        else if constexpr (layout == packed_inc || layout == packed_dec)
             static_assert(sizeof...(dims) == 1, "packed arrays have equal sides so need only one dimension");
     }
 
@@ -78,8 +77,8 @@ private:
             return 0;
         else if constexpr (layout == conventional)
             return (dims * ...);
-        else if constexpr (layout == packed)
-            return combinations(order + [](auto a, auto... b){ return a; }(dims...) - 1, order);
+        else if constexpr (layout == packed_inc || layout == packed_dec)
+            return Base_::combinations(order + [](auto a, auto... b){ return a; }(dims...) - 1, order);
     }
 
 
@@ -87,25 +86,21 @@ private:
 private:
 
     //  Calculates 1D memory index based on order-dimensional Array index.
-    //  Currently only implemented for Layout<conventional>.
 
     template <size_t level, typename I, typename ...J>
     auto index(I i, J... j) const noexcept
-    {   if constexpr (sizeof...(j) == 0)
-            return i;
-        else
-            return index<level + 1>(j...) * (*this)[level] + i;
-    }
-
-    //  Calculates 1D memory index based on n-dimensional Array index. Behavior is Axis property dependent if n < order.
-    //  Currently only implemented for Layout<conventional>.
-
-    template <size_t level, typename ...I>
-    auto index_offset(I... i) const noexcept
-    {   if constexpr (level == 0)
-            return index<0>(i...);
-        else
-            return index_offset<level - 1>(0, i...);
+    {   if constexpr (layout == conventional)
+        {   if constexpr (sizeof...(j) == 0)
+                return i;
+            else
+                return index<level + 1>(j...) * (*this)[level] + i;
+        }
+        else if constexpr (layout == packed_inc)
+        {   return Base_::PackedIndexing::template C_inc<0>(i, j...);
+        }
+        else if constexpr (layout == packed_dec)
+        {   return Base_::PackedIndexing::template C_dec<0>((*this)[0], i, j...);
+        }
     }
 
 
@@ -183,18 +178,23 @@ public:
 public:
 
     //  Indexing.
-    //  Currently only implemented for Layout<conventional>.
 
     template <typename ...I>
     value_type& operator()(I... i) noexcept
     {   index_validity(i...);
-        return (*this)()[index_offset<order - sizeof...(i)>(i...)];
+        if constexpr (sizeof...(i) != order)
+            return (*this)(0, i...);
+        else
+            return (*this)()[index<0>(i...)];
     }
 
     template <typename ...I>
     const value_type& operator()(I... i) const noexcept
     {   index_validity(i...);
-        return (*this)()[index_offset<order - sizeof...(i)>(i...)];
+        if constexpr (sizeof...(i) != order)
+            return (*this)(0, i...);
+        else
+            return (*this)()[index<0>(i...)];
     }
 };
 
