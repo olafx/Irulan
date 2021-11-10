@@ -127,7 +127,6 @@ Dynamic::Array<float[3], Allocate<false>> A {256, 256, 256};
 // A() == NULL
 float *a = new float[A[0] * A[1] * A[2]];
 A() = a;
-Dynamic::Array<float[256][256][256], Allocate<false>> B {A()};
 ```
 
 
