@@ -14,10 +14,6 @@ What sets this library apart from other tensor libraries is twofold:
 
 So it's really a tool for data oriented design.
 
-```C++
-using namespace Irulan;
-```
-
 
 
 ## Types
@@ -197,4 +193,43 @@ Even the element type of the array that stores the dimensions of a `Dynamic::Arr
 ```C++
 sizeof(Dynamic::Array<float[3]>); // 32 bytes on my system
 sizeof(Dynamic::Array<float[3], SizeType<uint32_t>>); // 24 bytes on my system
+```
+
+
+
+## Installation & Usage
+
+This library is header only.
+
+Can check if it works before installing:
+```
+mkdir build
+cd build
+cmake ..
+make
+ctest
+```
+
+Installation: (Very light, no library files or stored tests.)
+```
+make install
+```
+
+Example of usage in an external project:
+```cmake
+cmake_minimum_required(VERSION 3.20)
+project(A)
+set(CMAKE_CXX_STANDARD 17)
+find_package(Irulan)
+add_executable(a a.cc)
+target_link_libraries(a Irulan)
+```
+
+```C++
+#include <Irulan/Static.h>
+
+int main()
+{   using namespace Irulan;
+    Static::Array<float[42][42]> A;
+}
 ```
