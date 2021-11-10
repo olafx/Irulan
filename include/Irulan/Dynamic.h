@@ -23,8 +23,6 @@
 */
 
 #pragma once
-#include <cstdlib>
-#include <new>
 #include "Base.h"
 
 namespace Irulan
