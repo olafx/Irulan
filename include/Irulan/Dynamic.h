@@ -48,7 +48,7 @@ public:
           Base_::allocate,
           typename Base_::size_type,
           typename Base_::value_type;
-    static constexpr size_t order = Base_::dims[0];
+    static constexpr std::size_t order = Base_::dims[0];
 
 
 
@@ -94,7 +94,7 @@ private:
     //  Calculate the data size, which depends on Layout and dims.
 
     template <typename ...Dims>
-    static size_t size(Dims... dims) noexcept
+    static std::size_t size(Dims... dims) noexcept
     {   if constexpr (sizeof...(dims) == 0)
             return 0;
         else if constexpr (layout == conventional)
@@ -107,15 +107,15 @@ private:
 
 private:
 
-    //  Calculates 1D memory index based on order-dimensional Array index.
+    //  Calculate 1D memory index based on order-dimensional Array index.
 
-    template <size_t level, typename I, typename ...J>
+    template <std::size_t level, typename I, typename ...J>
     auto index(I i, J... j) const noexcept
     {   if constexpr (layout == conventional)
         {   if constexpr (sizeof...(j) == 0)
                 return i;
             else
-                return index<level + 1>(j...) * (*this)[level] + i;
+                return i + index<level + 1>(j...) * (*this)[level];
         }
         else if constexpr (layout == packed_inc)
         {   return Base_::PackedIndexing::template C_inc<0>(i, j...);

@@ -48,7 +48,7 @@ public:
           Base_::axis,
           typename Base_::size_type,
           typename Base_::value_type;
-    static constexpr size_t order = dims.size();
+    static constexpr std::size_t order = dims.size();
 
 
 
@@ -57,7 +57,7 @@ private:
     //  Some early compile time checks for incorrect use.
 
     static_assert((layout != packed_inc && layout != packed_dec) || []()
-    {   for (size_t i = 1; i < order; i++)
+    {   for (std::size_t i = 1; i < order; i++)
             if (dims[0] != dims[i])
                 return false;
         return true;
@@ -79,7 +79,7 @@ private:
 
     //  Unused default.
 
-    template <size_t order, LayoutEnum layout,
+    template <std::size_t order, LayoutEnum layout,
         typename = void>
     struct Data
     {
@@ -88,7 +88,7 @@ private:
 
     //  Layout<conventional> recursion case.
 
-    template <size_t order>
+    template <std::size_t order>
     struct Data<order, conventional,
         std::enable_if_t<order != 1>>
     {
@@ -157,7 +157,7 @@ private:
 
     //  Layout<conventional> base case.
 
-    template <size_t order>
+    template <std::size_t order>
     struct Data<order, conventional,
         std::enable_if_t<order == 1>>
     {   value_type value[dims[0]];
@@ -166,14 +166,14 @@ private:
 
     //  Layout<packed_inc> case.
 
-    template <size_t order>
+    template <std::size_t order>
     struct Data<order, packed_inc>
     {   value_type value[Base_::combinations(order + dims[0] - 1, order)];
     };
 
     //  Layout<packed_dec> case.
 
-    template <size_t order>
+    template <std::size_t order>
     struct Data<order, packed_dec>
     {   value_type value[Base_::combinations(order + dims[0] - 1, order)];
     };
@@ -199,7 +199,7 @@ public:
 
     Array() noexcept = default;
 
-    Array(const Array& other) noexcept = default;
+    Array(const Array&) noexcept = default;
 
     constexpr Array(const DeepInitList& list) noexcept
         : data {}
@@ -294,7 +294,7 @@ public:
     //  operator (in case the list's order is less than Array's order).
 
     constexpr Array& operator=(const DeepInitList& list) noexcept
-    {   for (size_type i = 0; i < list.size(); i++)
+    {   for (std::size_t i = 0; i < list.size(); i++)
             (*this)(i) = list.begin()[i];
         return *this;
     }

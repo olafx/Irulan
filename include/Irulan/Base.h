@@ -89,7 +89,7 @@ protected:
 
     //  Extract the size type already, because it's needed in the definition of the next extractor.
 
-    using size_type = typename Extractor<SizeTypeBase, SizeType<size_t>>::type::type;
+    using size_type = typename Extractor<SizeTypeBase, SizeType<std::size_t>>::type::type;
 
     //  Shape extraction needs its own specialization because this property works differently from the rest.
     //  The Default type reflects the default type of the data, which is not the shape.
@@ -183,7 +183,7 @@ protected:
     //  Defining a nested version of std::initializer_list.
     //  Used for setting values of Array for e.g. initialization.
 
-    template <size_t depth, typename T>
+    template <std::size_t depth, typename T>
     struct DeepInitList
     {   using type = std::initializer_list<typename DeepInitList<depth - 1, T>::type>;
     };
@@ -217,7 +217,7 @@ protected:
     {
         //  Evaluates part of a factorial.
 
-        template <size_t a, size_t b, typename I>
+        template <std::size_t a, std::size_t b, typename I>
         static auto A_inc(I i)
         {   if constexpr (a == b)
                 return i + a;
@@ -229,7 +229,7 @@ protected:
 
         //  Evaluates part of a more complicate factorial-like expression.
 
-        template <size_t a, size_t b, typename I>
+        template <std::size_t a, std::size_t b, typename I>
         static auto A_dec(size_type n, I i)
         {   if constexpr (b == 0)
                 return i;
@@ -243,7 +243,7 @@ protected:
 
         //  Divides by part of a factorial.
 
-        template <size_t b, typename I>
+        template <std::size_t b, typename I>
         static auto B(I i)
         {   if constexpr (b == 0)
                 return i;
@@ -258,7 +258,7 @@ protected:
         //      + l * (l + 1) * (l + 2) * (l + 3) / (2 * 3 * 4)
         //      + ...
 
-        template <size_t a, typename I, typename ...J>
+        template <std::size_t a, typename I, typename ...J>
         static auto C_inc(I i, J... j)
         {   if constexpr (sizeof...(j) == 0)
                 return B<a>(A_inc<0, a>(i));
@@ -273,7 +273,7 @@ protected:
         //      + l * (2 * n - l - 1) * (2 * n - l) * (2 * n - l + 1) / (2 * 3 * 4)
         //      + ...
 
-        template <size_t a, typename I, typename ...J>
+        template <std::size_t a, typename I, typename ...J>
         static auto C_dec(size_type n, I i, J... j)
         {   if constexpr (sizeof...(j) == 0)
                 return B<a>(A_dec<0, a>(n, i));
