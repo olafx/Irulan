@@ -46,9 +46,16 @@ public:
     using Base_::layout,
           Base_::axis,
           Base_::allocate,
+          Base_::efficient_shape,
           typename Base_::size_type,
           typename Base_::value_type;
     static constexpr std::size_t order = Base_::dims[0];
+
+
+
+private:
+
+    static constexpr std::size_t stored_order = Base_::dims[0] - (efficient_shape ? 1 : 0);
 
 
 
@@ -62,8 +69,39 @@ private:
 
 private:
 
-    value_type *data;
-    size_type dims[order];
+    template <size_t n_dims>
+    struct Data
+    {
+        value_type *data;
+        size_type dims[n_dims];
+
+        //  Have to prevent potentially writing the last dim in constructor to dims if EfficientShape is enabled.
+
+        template <size_t current = 0, typename Dim, typename ...Dims>
+        void set_dims(Dim dim, Dims... dims_)
+        {   if constexpr (current != stored_order)
+            {   dims[current] = dim;
+                set_dims<current + 1>(dims_...);
+            }
+        }
+
+        template <size_t current = 0>
+        void set_dims()
+        {
+        }
+    };
+
+    template <>
+    struct Data<0>
+    {   value_type *data;
+
+        template <typename ...Dims>
+        void set_dims(Dims...)
+        {
+        }
+    };
+
+    Data<order - (efficient_shape ? 1 : 0)> data;
 
 
 
@@ -132,24 +170,24 @@ public:
     template <typename ...Dims,
         bool allocate_delayed = allocate, std::enable_if_t<allocate_delayed>* = nullptr>
     Array(Dims... dims)
-        : dims {static_cast<size_type>(dims)...},
-          data {new value_type[size(dims...)]}
+        : data {new value_type[size(dims...)]}
     {   dims_validity(dims...);
+        data.set_dims(dims...);
     }
 
     template <typename ...Dims,
         bool allocate_delayed = allocate, std::enable_if_t<!allocate_delayed>* = nullptr>
     Array(Dims... dims) noexcept
-        : dims {static_cast<size_type>(dims)...},
-          data {NULL}
+        : data {NULL}
     {   dims_validity(dims...);
+        data.set_dims(dims...);
     }
 
 
 
     ~Array() noexcept
     {   if constexpr (allocate)
-            delete[] data;
+            delete[] data.data;
     }
 
 
@@ -161,13 +199,13 @@ public:
     template <typename I>
     size_type& operator[](I i) noexcept
     {   index_validity(i);
-        return dims[i];
+        return data.dims[i];
     }
 
     template <typename I>
     const size_type& operator[](I i) const noexcept
     {   index_validity(i);
-        return dims[i];
+        return data.dims[i];
     }
 
 
@@ -178,21 +216,23 @@ public:
 
     template <bool allocate_delayed = allocate, typename = std::enable_if_t<allocate_delayed>>
     value_type *operator()() noexcept
-    {   return data;
+    {   return data.data;
     }
 
     template <bool allocate_delayed = allocate, typename = std::enable_if_t<allocate_delayed>>
     const value_type *operator()() const noexcept
-    {   return data;
+    {   return data.data;
     }
 
 
+    template <bool allocate_delayed = allocate, typename = std::enable_if_t<!allocate_delayed>>
     value_type *&operator()() noexcept
-    {   return data;
+    {   return data.data;
     }
 
+    template <bool allocate_delayed = allocate, typename = std::enable_if_t<!allocate_delayed>>
     const value_type * const& operator()() const noexcept
-    {   return data;
+    {   return data.data;
     }
 
 

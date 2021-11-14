@@ -85,18 +85,33 @@ struct AllocateBase
 
 template <bool allocate>
 struct Allocate : AllocateBase
-{   static constexpr bool value {allocate};
+{   static constexpr bool value = allocate;
 };
 
 
 
 //  The size type property specifies the type to use for specifying the Array's shape.
 
-struct SizeTypeBase {};
+struct SizeTypeBase
+{
+};
 
 template <typename size_type>
 struct SizeType : SizeTypeBase
 {   using type = size_type;
+};
+
+
+
+//  One dimension is not needed for indexing. With this property, Dynamic::Array is optimized by not storing it.
+
+struct EfficientShapeBase
+{
+};
+
+template <bool efficient>
+struct EfficientShape : EfficientShapeBase
+{   static constexpr bool value = efficient;
 };
 
 }

@@ -197,6 +197,17 @@ sizeof(Dynamic::Array<float[3], SizeType<uint32_t>>); // 24 bytes on my system
 
 
 
+## Efficient Shape
+
+One of the dimensions is always not used for indexing. Sometimes this means it doesn't have to be stored, sometimes not. This property optimizes storage by not storing it.
+
+```C++
+Dynamic::Array<float[1], EfficientShape<true>> A {10};
+A[0]; // incorrect usage, A stores no shape since 1-1=0
+```
+
+
+
 ## Installation & Usage
 
 This library is header only.

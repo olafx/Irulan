@@ -31,7 +31,7 @@
 namespace Irulan
 {
 
-// Base class of Array.
+//  Base class of Array.
 
 template <typename ...Properties>
 struct Base
@@ -170,10 +170,11 @@ protected:
 
     //  Using the extractor.
 
-    static constexpr LayoutEnum layout   {Extractor<LayoutBase, Layout<conventional>>::type::value};
-    static constexpr AxisEnum   axis     {Extractor<AxisBase, Axis<column>>          ::type::value};
-    static constexpr bool       allocate {Extractor<AllocateBase, Allocate<true>>    ::type::value};
-    static constexpr std::array dims     {Extractor<ShapeBase, double>::dims};
+    static constexpr LayoutEnum layout          = Extractor<LayoutBase,         Layout<conventional>> ::type::value;
+    static constexpr AxisEnum   axis            = Extractor<AxisBase,           Axis<column>>         ::type::value;
+    static constexpr bool       allocate        = Extractor<AllocateBase,       Allocate<true>>       ::type::value;
+    static constexpr bool       efficient_shape = Extractor<EfficientShapeBase, EfficientShape<false>>::type::value;
+    static constexpr std::array dims             {Extractor<ShapeBase, double>::dims};
     using value_type = typename Extractor<ShapeBase, double>::value_type;
 
 
