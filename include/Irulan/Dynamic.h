@@ -187,11 +187,11 @@ public:
     }
 
 
-    value_type *& operator()() noexcept
+    value_type *&operator()() noexcept
     {   return data;
     }
 
-    const value_type *& operator()() const noexcept
+    const value_type * const& operator()() const noexcept
     {   return data;
     }
 
