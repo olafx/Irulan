@@ -56,12 +56,14 @@ private:
 
     //  Some early compile time checks for incorrect use.
 
-    static_assert((layout != packed_inc && layout != packed_dec) || []()
-    {   for (std::size_t i = 1; i < order; i++)
-            if (dims[0] != dims[i])
-                return false;
-        return true;
-    }(), "packed arrays should have equal sides");
+    static_assert([]()
+        {   if constexpr (layout == packed_inc || layout == packed_dec)
+            {   for (std::size_t i = 1; i < order; i++)
+                    if (dims[0] != dims[i])
+                        return false;
+            }
+            return true;
+        }(), "packed arrays should have equal sides");
 
 
 

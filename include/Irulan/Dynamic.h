@@ -76,9 +76,9 @@ private:
     {   static_assert((std::is_integral_v<Dims> && ...), "dimension types must be integral");
         static_assert((std::is_convertible_v<Dims, size_type> && ...), "dimension types must be convertible to size type");
         if constexpr (layout == conventional)
-            static_assert(sizeof...(dims) == order, "number of given dimensions must equal order");
+            static_assert(sizeof...(dims) <= order, "number of given dimensions should be at most order");
         else if constexpr (layout == packed_inc || layout == packed_dec)
-            static_assert(sizeof...(dims) == 1, "packed arrays have equal sides so need only one dimension");
+            static_assert(sizeof...(dims) <= 1, "packed arrays have equal sides so need only one dimension");
     }
 
     template <typename ...I>
